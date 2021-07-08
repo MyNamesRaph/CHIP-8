@@ -66,7 +66,8 @@ void Chip8::printMemory()
 void Chip8::emulateCycle()
 {
 	unsigned short opcode = fetchOpcode();
-
+	this->opcode = opcode;
+	executeOpcode(opcode);
 }
 
 unsigned short Chip8::fetchOpcode()
@@ -222,8 +223,15 @@ void Chip8::op00EE()
 {
 }
 
-void Chip8::op1NNN(){ }
-void Chip8::op2NNN(){ }
+void Chip8::op1NNN()
+{
+}
+void Chip8::op2NNN()
+{
+	stack[stackPointer] = programCounter;
+	++stackPointer;
+	programCounter = opcode & 0x0FFF;
+}
 void Chip8::op3XNN(){ }
 void Chip8::op4XNN(){ }
 void Chip8::op5XY0(){ }
