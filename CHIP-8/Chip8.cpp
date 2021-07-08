@@ -15,7 +15,7 @@ void Chip8::initialize()
 	opcode = 0; //Reset the current opcode
 	indexRegister = 0; //Reset the index register
 	stackPointer; //Reset the stack pointer
-	clearScreen_00E0();
+	op00E0(); //Clears the screen
 	//TODO: probably have to make this better at some point.
 	std::fill(std::begin(stack), std::end(stack), 0); //Clear the stack 
 	std::fill(std::begin(V), std::end(V), 0); //Clear the registers V0 to VF
@@ -83,91 +83,91 @@ void Chip8::executeOpcode(unsigned short opcode)
 		switch (opcode & 0x000F)
 		{
 		case 0x0000:
-			//00E0();
+			op00E0();
 			break;
 		case 0x000E:
-			//00EE();
+			op00EE();
 			break;
 
 		default:
 			std::cout << "Unknown opcode [0x0000]: " << opcode;
 		}
 	case 0x1000:
-		//1NNN
+		op1NNN();
 		break;
 	case 0x2000:
-		//2NNN
+		op2NNN();
 		break;
 	case 0x3000:
-		//3XNN
+		op3XNN();
 		break;
 	case 0x4000:
-		//4XNN
+		op4XNN();
 		break;
 	case 0x5000:
-		//5XY0
+		op5XY0();
 		break;
 	case 0x6000:
-		//6XNN
+		op6XNN();
 		break;
 	case 0x7000:
-		//7XNN
+		op7XNN();
 		break;
 	case 0x8000:
 		switch (opcode & 0x000F)
 		{
 		case 0x0000:
-			//8XY0
+			op8XY0();
 			break;
 		case 0x0001:
-			//8XY1
+			op8XY1();
 			break;
 		case 0x0002:
-			//8XY2
+			op8XY2();
 			break;
 		case 0x0003:
-			//8XY3
+			op8XY3();
 			break;
 		case 0x0004:
-			//8XY4
+			op8XY4();
 			break;
 		case 0x0005:
-			//8XY5
+			op8XY5();
 			break;
 		case 0x0006:
-			//8XY6
+			op8XY6();
 			break;
 		case 0x0007:
-			//8XY7
+			op8XY7();
 			break;
 		case 0x000E:
-			//8XYE
+			op8XYE();
 			break;
 		}
 		break;
 	case 0x9000:
-		//9XY0
+		op9XY0();
 		break;
 	case 0xA000:
-		//ANNN
+		opANNN();
 		break;
 	case 0xB000:
-		//BNNN
+		opBNNN();
 		break;
 	case 0xC000:
-		//CXNN
+		opCXNN();
 		break;
 	case 0xD000:
-		//DXYN
+		opDXYN();
 		break;
 	case 0xE000:
 		switch(opcode & 0x000F) 
 		{
 		case 0x000E:
-			//EX9E
+			opEX9E();
 			break;
 		case 0x0001:
-			//EXA1
+			opEXA1();
 			break;
 		default:
 			std::cout << "Unknown opcode [0xE000]: " << opcode;
@@ -177,31 +177,31 @@ void Chip8::executeOpcode(unsigned short opcode)
 		switch (opcode & 0x00FF)
 		{
 		case 0x0007:
-			//FX07
+			opFX07();
 			break;
 		case 0x000A:
-			//FX0A
+			opFX0A();
 			break;
 		case 0x0015:
-			//FX15
+			opFX15();
 			break;
 		case 0x0018:
-			//FX18
+			opFX18();
 			break;
 		case 0x001E:
-			//FX1E
+			opFX1E();
 			break;
 		case 0x0029:
-			//FX29
+			opFX29();
 			break;
 		case 0x0033:
-			//FX33
+			opFX33();
 			break;
 		case 0x0055:
-			//FX55
+			opFX55();
 			break;
 		case 0x0065:
-			//FX65
+			opFX65();
 			break;
 		default:
 			std::cout << "Unknown opcode [0xF000]: " << opcode;
@@ -213,7 +213,44 @@ void Chip8::executeOpcode(unsigned short opcode)
 	
 }
 
-void Chip8::clearScreen_00E0() 
+void Chip8::op00E0() 
 {
 	std::fill(std::begin(graphics), std::end(graphics), 0);
 }
+
+void Chip8::op00EE()
+{
+}
+
+void Chip8::op1NNN(){ }
+void Chip8::op2NNN(){ }
+void Chip8::op3XNN(){ }
+void Chip8::op4XNN(){ }
+void Chip8::op5XY0(){ }
+void Chip8::op6XNN(){ }
+void Chip8::op7XNN(){ }
+void Chip8::op8XY0(){ }
+void Chip8::op8XY1(){ }
+void Chip8::op8XY2(){ }
+void Chip8::op8XY3(){ }
+void Chip8::op8XY4(){ }
+void Chip8::op8XY5(){ }
+void Chip8::op8XY6(){ }
+void Chip8::op8XY7(){ }
+void Chip8::op8XYE(){ }
+void Chip8::op9XY0(){ }
+void Chip8::opANNN(){ }
+void Chip8::opBNNN(){ }
+void Chip8::opCXNN(){ }
+void Chip8::opDXYN(){ }
+void Chip8::opEX9E(){ }
+void Chip8::opEXA1(){ }
+void Chip8::opFX07(){ }
+void Chip8::opFX0A(){ }
+void Chip8::opFX15(){ }
+void Chip8::opFX18(){ }
+void Chip8::opFX1E(){ }
+void Chip8::opFX29(){ }
+void Chip8::opFX33(){ }
+void Chip8::opFX55(){ }
+void Chip8::opFX65(){ }
