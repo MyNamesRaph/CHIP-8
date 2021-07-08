@@ -221,6 +221,8 @@ void Chip8::op00E0()
 
 void Chip8::op00EE()
 {
+	--stackPointer;
+	programCounter = stack[programCounter];
 }
 
 void Chip8::op1NNN()
