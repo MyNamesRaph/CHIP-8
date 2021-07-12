@@ -3,6 +3,9 @@
 #include <cstdio>
 #include <string>
 #include <iostream>
+#include <random>
+#include <functional>
+#include <vector>
 
 Chip8::Chip8()
 {
@@ -26,6 +29,9 @@ void Chip8::initialize()
 		memory[i] = chip8_fontset[i];
 
 	delayTimer, soundTimer = 0; //Reset the timers
+
+	std::mt19937::result_type seed = time(0);
+	auto rng = std::bind(std::uniform_int_distribution<int>(0, 255), std::mt19937(seed));
 }
 
 void Chip8::loadProgram(char* file)
@@ -217,16 +223,19 @@ void Chip8::executeOpcode(unsigned short opcode)
 void Chip8::op00E0() 
 {
 	std::fill(std::begin(graphics), std::end(graphics), 0);
+	programCounter += 2;
 }
 
 void Chip8::op00EE()
 {
 	--stackPointer;
 	programCounter = stack[programCounter];
+	programCounter += 2;
 }
 
 void Chip8::op1NNN()
 {
+	programCounter = opcode & 0x0FFF;
 }
 void Chip8::op2NNN()
 {
@@ -234,33 +243,191 @@ void Chip8::op2NNN()
 	++stackPointer;
 	programCounter = opcode & 0x0FFF;
 }
-void Chip8::op3XNN(){ }
-void Chip8::op4XNN(){ }
-void Chip8::op5XY0(){ }
-void Chip8::op6XNN(){ }
-void Chip8::op7XNN(){ }
-void Chip8::op8XY0(){ }
-void Chip8::op8XY1(){ }
-void Chip8::op8XY2(){ }
-void Chip8::op8XY3(){ }
-void Chip8::op8XY4(){ }
-void Chip8::op8XY5(){ }
-void Chip8::op8XY6(){ }
-void Chip8::op8XY7(){ }
-void Chip8::op8XYE(){ }
-void Chip8::op9XY0(){ }
-void Chip8::opANNN(){ }
-void Chip8::opBNNN(){ }
-void Chip8::opCXNN(){ }
-void Chip8::opDXYN(){ }
+void Chip8::op3XNN()
+{
+	if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF))
+		programCounter += 4;
+	else
+		programCounter += 2;
+}
+void Chip8::op4XNN()
+{
+	if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+	{
+		programCounter += 4;
+	}
+}
+void Chip8::op5XY0()
+{
+	if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4])
+	{
+		programCounter += 4;
+	}
+}
+void Chip8::op6XNN()
+{
+	V[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+	programCounter += 2;
+}
+void Chip8::op7XNN()
+{
+	V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
+	programCounter += 2;
+}
+void Chip8::op8XY0()
+{
+	V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
+	programCounter += 2;
+}
+void Chip8::op8XY1()
+{
+	V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] | V[(opcode & 0x00F0) >> 4];
+	programCounter += 2;
+}
+void Chip8::op8XY2()
+{
+	V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4];
+	programCounter += 2;
+}
+void Chip8::op8XY3()
+{
+	V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] ^ V[(opcode & 0x00F0) >> 4];
+	programCounter += 2;
+}
+void Chip8::op8XY4()
+{
+	unsigned short VX = V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4];
+
+	if (VX > 255)
+		V[0xF] = 1;
+	else
+		V[0xF] = 0;
+
+	unsigned char VXlow = VX & 0b1111111100000000;
+
+	V[(opcode & 0x0F00) >> 8] = VXlow;
+	programCounter += 2;
+}
+void Chip8::op8XY5()
+{
+	if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4])
+		V[0xF] = 1;
+	else
+		V[0xF] = 0;
+
+	V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] - V[(opcode & 0x00F0) >> 4];
+	programCounter += 2;
+}
+void Chip8::op8XY6()
+{
+	V[0xF] = V[(opcode & 0x0F00) >> 8] & 1;
+	V[(opcode & 0x0F00) >> 8] >>= 1;
+	programCounter += 2;
+}
+void Chip8::op8XY7()
+{
+	if (V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8])
+		V[0xF] = 1;
+	else
+		V[0xF] = 0;
+
+	V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
+	programCounter += 2;
+}
+void Chip8::op8XYE()
+{
+	V[0xF] = V[(opcode & 0x0F00) >> 8] & 0b10000000;
+	V[(opcode & 0x0F00) >> 8] >>= 1;
+	programCounter += 2;
+}
+void Chip8::op9XY0()
+{
+	if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4])
+		programCounter += 4;
+	else
+		programCounter += 2;
+}
+void Chip8::opANNN()
+{
+	indexRegister = opcode & 0x0FFF;
+	programCounter += 2;
+}
+void Chip8::opBNNN()
+{
+	programCounter = (opcode & 0x0FFF) + V[0];
+}
+void Chip8::opCXNN()
+{
+	V[(opcode & 0x0F00) >> 8] = rng() & opcode & 0x00FF;
+	programCounter += 2;
+}
+void Chip8::opDXYN()
+{
+	unsigned short x = V[(opcode & 0x0F00) >> 8];
+	unsigned short y = V[(opcode & 0x00F0) >> 4];
+	unsigned short n = opcode & 0x000F;
+
+	std::vector<bool> sprite{};
+
+	for (unsigned short i = 0; i < n; i++)
+	{
+		unsigned char byte = memory[indexRegister + i];
+		for (int bit = 0; bit < 8; bit++)
+		{
+			sprite.push_back((byte & (1 << 7 - bit)) >> 7 - bit);
+		}
+		
+	}
+
+	V[0xF] = 0;
+	bool isFlipped = false;
+
+	for (int yDraw = 0; yDraw < sprite.size(); yDraw++)
+	{
+		for (int xDraw = 0; xDraw < 8; xDraw++)
+		{
+			int index = yDraw * 64 + xDraw;
+			bool value = graphics[index];
+			graphics[index] ^= sprite[yDraw];
+			if (value == 1 && graphics[index] == 0) isFlipped = true;
+		}
+	}
+
+	if (isFlipped) V[0xF] = 1;
+
+}
 void Chip8::opEX9E(){ }
 void Chip8::opEXA1(){ }
 void Chip8::opFX07(){ }
 void Chip8::opFX0A(){ }
 void Chip8::opFX15(){ }
 void Chip8::opFX18(){ }
-void Chip8::opFX1E(){ }
-void Chip8::opFX29(){ }
-void Chip8::opFX33(){ }
-void Chip8::opFX55(){ }
-void Chip8::opFX65(){ }
+void Chip8::opFX1E()
+{
+	indexRegister += V[(opcode & 0x0F00) >> 8];
+	programCounter += 2;
+}
+void Chip8::opFX29()
+{
+}
+void Chip8::opFX33()
+{
+	memory[indexRegister] = V[(opcode & 0x0F00) >> 8] / 100;
+	memory[indexRegister + 1] = (V[(opcode & 0x0F00) >> 8] / 10) % 10;
+	memory[indexRegister + 2] = (V[(opcode & 0x0F00) >> 8] % 100) % 10;
+	programCounter += 2;
+}
+void Chip8::opFX55()
+{
+	for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++)
+	{
+		memory[indexRegister + i] = V[i];
+	}
+}
+void Chip8::opFX65()
+{
+	for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++)
+	{
+		V[i] = memory[indexRegister + i];
+	}
+}

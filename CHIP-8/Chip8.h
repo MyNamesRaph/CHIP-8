@@ -1,5 +1,6 @@
 #pragma once
-#include <string>
+#include <random>
+
 class Chip8
 {
 private:
@@ -8,7 +9,7 @@ private:
 	unsigned char V[16]; //general purpose registers V0 to VF | VF is used for the carry flag
 	unsigned short indexRegister;
 	unsigned short programCounter;
-	unsigned char graphics[64 * 32];
+	bool graphics[2048];
 	unsigned char delayTimer;
 	unsigned char soundTimer;
 
@@ -16,6 +17,8 @@ private:
 	unsigned short stackPointer;
 
 	unsigned char key[16];
+
+	std::mt19937 rng;
 
 	/// <summary>
 	/// chip8 fontset that contains characters 0 through F
